@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Megamind — Performance Snapshot, April 2026</title>
+<style>
+  /* ============================================================
+     Print-first design. Light neutrals. Generous whitespace.
+     Optimised for A4 PDF + email screen reading.
+     ============================================================ */
+
+  :root {
+    --paper: #fafaf7;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a48;
+    --ink-faint: #8a8a85;
+    --line: #d8d6cf;
+    --line-soft: #e8e6df;
+    --tile: #ffffff;
+    --tile-alt: #f4f3ee;
+    --accent: #2d4a2b;       /* deep forest green for emphasis */
+    --accent-soft: #e8efe5;
+    --warn: #8a5a1f;          /* amber for flags */
+    --warn-soft: #f5ecd8;
+    --good: #2d4a2b;
+    --good-soft: #e8efe5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-size: 11pt;
+  }
+
+  body { padding: 0; }
+
+  .page {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 56px 56px 80px;
+    background: var(--paper);
+  }
+
+  /* Header */
+  .doc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 40px;
+  }
+
+  .doc-head .brand {
+    font-size: 11pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .doc-head .meta {
+    text-align: right;
+    font-size: 9pt;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* Title */
+  .title-block { margin-bottom: 36px; }
+
+  .eyebrow {
+    font-size: 9pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 300;
+    font-size: 28pt;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  .lede {
+    font-size: 11pt;
+    color: var(--ink-soft);
+    max-width: 580px;
+    line-height: 1.6;
+  }
+
+  /* Hero metrics — flexbox for wkhtmltopdf compatibility */
+  .hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .hero-tile {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    padding: 22px 20px;
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+
+  .hero-tile .label {
+    font-size: 8pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .hero-tile .value {
+    font-size: 24pt;
+    font-weight: 300;
+    line-height: 1.05;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .hero-tile .delta {
+    font-size: 9pt;
+    color: var(--good);
+    font-weight: 500;
+  }
+
+  /* Sections */
+  section {
+    margin-bottom: 40px;
+    page-break-inside: avoid;
+  }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 14pt;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  .section-num {
+    font-size: 9pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+
+  /* Tables — clean, traditional, readable */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+
+  table.data th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 8.5pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    border-bottom: 1.5px solid var(--ink);
+    background: var(--tile-alt);
+  }
+
+  table.data td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 10.5pt;
+    color: var(--ink);
+    vertical-align: top;
+  }
+
+  table.data td.num, table.data th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.data td.label {
+    color: var(--ink-soft);
+  }
+
+  table.data tr:last-child td {
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  /* Pills — subtle, neutral */
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+
+  .pill.good {
+    background: var(--good-soft);
+    color: var(--good);
+  }
+
+  .pill.warn {
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+
+  .pill.neutral {
+    background: var(--tile-alt);
+    color: var(--ink-soft);
+  }
+
+  /* Two-column layout for channel cards — flexbox for wkhtmltopdf */
+  .two-col {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    page-break-inside: avoid;
+  }
+
+  .two-col > .panel {
+    flex: 1 1 calc(50% - 7px);
+    min-width: 0;
+  }
+
+  .panel {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    padding: 22px 24px;
+  }
+
+  .panel h3 {
+    font-size: 11.5pt;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--ink);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 10pt;
+    border-bottom: 1px dotted var(--line-soft);
+  }
+
+  .panel .row:last-child { border-bottom: none; }
+
+  .panel .row .k { color: var(--ink-soft); }
+
+  .panel .row .v {
+    color: var(--ink);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .panel .row .v.accent {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .panel .row .v small {
+    display: block;
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+
+  /* Cohort table */
+  .cohort {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    padding: 24px;
+  }
+
+  .cohort-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft);
+    overflow: hidden;
+  }
+
+  .cohort-row:last-child { border-bottom: none; }
+
+  .cohort-row .name {
+    float: left;
+    width: 90px;
+    font-size: 10pt;
+    color: var(--ink-soft);
+    font-weight: 500;
+    line-height: 14px;
+  }
+
+  .cohort-row .pct {
+    float: right;
+    width: 70px;
+    text-align: right;
+    font-size: 11pt;
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 14px;
+  }
+
+  .cohort-row .bar-track {
+    margin: 0 80px 0 100px;
+    background: var(--tile-alt);
+    height: 14px;
+    position: relative;
+  }
+
+  .cohort-row .bar-fill {
+    background: var(--accent);
+    height: 100%;
+  }
+
+  .cohort-row.highlight .name { color: var(--accent); font-weight: 700; }
+  .cohort-row.highlight .pct { color: var(--accent); }
+
+  /* Strategic argument box */
+  .argument {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+
+  .argument .arg-eyebrow {
+    font-size: 9pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .argument h3 {
+    font-size: 14pt;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+
+  .argument p {
+    font-size: 10.5pt;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    margin-bottom: 8px;
+  }
+
+  .argument p:last-child { margin-bottom: 0; }
+
+  .argument strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* Plan tier */
+  .tier {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .tier-head {
+    display: block;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .tier-num {
+    font-size: 8.5pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 14px;
+  }
+
+  .tier-name {
+    font-size: 11.5pt;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .tier ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .tier li {
+    padding: 7px 0;
+    font-size: 10pt;
+    color: var(--ink-soft);
+    border-bottom: 1px dotted var(--line-soft);
+    overflow: hidden;
+  }
+
+  .tier li:last-child { border-bottom: none; }
+
+  .tier li .task {
+    float: left;
+    max-width: 70%;
+  }
+
+  .tier li .timing {
+    float: right;
+    font-size: 8.5pt;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    margin-left: 16px;
+  }
+
+  .tier li .timing.warn { color: var(--warn); font-weight: 600; }
+
+  /* Waiting list */
+  .waiting {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    padding: 24px 28px;
+    page-break-inside: avoid;
+  }
+
+  .waiting-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft);
+    overflow: hidden;
+  }
+
+  .waiting-row:first-child { padding-top: 0; }
+  .waiting-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .waiting-num {
+    float: left;
+    width: 36px;
+    font-size: 9pt;
+    color: var(--accent);
+    font-weight: 700;
+    padding-top: 2px;
+  }
+
+  .waiting-status {
+    float: right;
+    font-size: 8.5pt;
+    color: var(--warn);
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-top: 2px;
+    margin-left: 16px;
+  }
+
+  .waiting-status.neutral { color: var(--ink-faint); }
+
+  .waiting-text {
+    margin: 0 100px 0 36px;
+    font-size: 10pt;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .waiting-text strong { font-weight: 600; }
+
+  /* Quotes */
+  .quote {
+    background: var(--tile);
+    border-left: 2px solid var(--accent);
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: 10.5pt;
+    color: var(--ink);
+    font-style: italic;
+    line-height: 1.55;
+  }
+
+  .quote .attr {
+    display: block;
+    font-style: normal;
+    font-size: 9pt;
+    color: var(--ink-faint);
+    margin-top: 8px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Note */
+  .note {
+    font-size: 9pt;
+    color: var(--ink-faint);
+    margin-top: 10px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* Footer */
+  .doc-foot {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9pt;
+    color: var(--ink-faint);
+    letter-spacing: 0.03em;
+  }
+
+  /* Page break controls */
+  .pagebreak { page-break-before: always; }
+  .keep-together { page-break-inside: avoid; }
+
+  /* Print optimisations */
+  @media print {
+    body { background: white; }
+    .page { padding: 24px 32px; max-width: 100%; }
+    h1 { font-size: 24pt; }
+    .hero-tile .value { font-size: 20pt; }
+    .hero { gap: 10px; }
+    .hero-tile { padding: 16px 14px; }
+  }
+
+  /* Screen — keep it tidy on web view too */
+  @media screen and (max-width: 720px) {
+    .hero { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .page { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="doc-head">
+    <div class="brand">Megamind &nbsp;·&nbsp; Fynal Form Nutrition</div>
+    <div class="meta">
+      Performance Snapshot<br>
+      28 March – 27 April 2026<br>
+      Prepared by In Haus Studio
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <div class="eyebrow">Monthly review</div>
+    <h1>Sales up 46%. Subscriptions up 86%.<br>Email in the top 5% globally.</h1>
+    <p class="lede">
+      Six weeks since the rebrand and new site launched. Four weeks since
+      the pop-up went live. The product is working, the site is converting,
+      and every primary metric is up. The plan for May focuses on UGC and
+      content to compound the gains and reduce dependence on paid media.
+    </p>
+  </div>
+
+  <!-- HERO METRICS -->
+  <div class="hero">
+    <div class="hero-tile">
+      <div class="label">Total Sales · 30d</div>
+      <div class="value">A$36.3K</div>
+      <div class="delta">↑ 46% vs prior 30d</div>
+    </div>
+    <div class="hero-tile">
+      <div class="label">Orders · 30d</div>
+      <div class="value">268</div>
+      <div class="delta">↑ 43% vs prior 30d</div>
+    </div>
+    <div class="hero-tile">
+      <div class="label">Sessions · 30d</div>
+      <div class="value">7,464</div>
+      <div class="delta">↑ 24% vs prior 30d</div>
+    </div>
+    <div class="hero-tile">
+      <div class="label">Conversion · 30d</div>
+      <div class="value">2.38%</div>
+      <div class="delta">↑ 20% vs prior 30d</div>
+    </div>
+  </div>
+
+  <!-- SINCE LAUNCH -->
+  <section>
+    <div class="section-head">
+      <h2>Since launch · 6 weeks · 15 March – 27 April</h2>
+      <span class="section-num">01</span>
+    </div>
+    <table class="data">
+      <tbody>
+        <tr><td class="label">Total sales since launch</td><td class="num">A$54,939.82</td></tr>
+        <tr><td class="label">Orders since launch</td><td class="num">405</td></tr>
+        <tr><td class="label">Average order value</td><td class="num">A$125.32</td></tr>
+        <tr><td class="label">Mobile traffic share</td><td class="num">94%</td></tr>
+        <tr><td class="label">Pop-up redemptions in 25 days</td><td class="num">67</td></tr>
+        <tr><td class="label">Pop-up attributed revenue (est.)</td><td class="num">~A$8,400</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Two interventions compounding: the new site launch on 15 March, then the pop-up + 10% discount on 2 April. Sales growth is outpacing traffic growth — meaning the site is converting better, not just attracting more visitors.</p>
+  </section>
+
+  <!-- CHANNEL BREAKDOWN -->
+  <section>
+    <div class="section-head">
+      <h2>Owned channels are compounding</h2>
+      <span class="section-num">02</span>
+    </div>
+    <div class="two-col">
+
+      <div class="panel">
+        <h3>Email · Klaviyo · top 5% globally</h3>
+        <div class="row"><span class="k">Open rate</span><span class="v">48.1% <span class="pill neutral">62nd %ile</span></span></div>
+        <div class="row"><span class="k">Click rate</span><span class="v accent">23.1% <span class="pill good">96th %ile</span></span></div>
+        <div class="row"><span class="k">Conversion rate</span><span class="v accent">24% <span class="pill good">97th %ile</span></span></div>
+        <div class="row"><span class="k">Per-recipient revenue</span><span class="v accent">A$3.59</span></div>
+        <div class="row"><span class="k">Industry "strong" benchmark</span><span class="v">A$1.50</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>Subscriptions · Recharge</h3>
+        <div class="row"><span class="k">Processed revenue</span><span class="v accent">A$25,634.54 <span class="pill good">↑ 86%</span></span></div>
+        <div class="row"><span class="k">Active subscribers</span><span class="v">145 <span class="pill good">↑ 64%</span></span></div>
+        <div class="row"><span class="k">New subscribers</span><span class="v">84 <span class="pill good">↑ 18%</span></span></div>
+        <div class="row"><span class="k">Subscription widget revenue</span><span class="v">A$16,047.97</span></div>
+        <div class="row"><span class="k">Failed payment recovery (90d)</span><span class="v">A$2,855.64</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>SMS · Klaviyo</h3>
+        <div class="row"><span class="k">Active subscribers</span><span class="v accent">405 <span class="pill good">↑ 326%</span></span></div>
+        <div class="row"><span class="k">Driven primarily by</span><span class="v">Pop-up signups</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>Reviews · Yotpo</h3>
+        <div class="row"><span class="k">Live reviews on site</span><span class="v accent">51</span></div>
+        <div class="row"><span class="k">Widget star rating</span><span class="v accent">4.5★</span></div>
+        <div class="row"><span class="k">All-time average</span><span class="v">4.58★</span></div>
+        <div class="row"><span class="k">Reviews this period</span><span class="v">14</span></div>
+        <div class="row"><span class="k">Geographic split</span><span class="v">92% AU · 7% CA</span></div>
+      </div>
+
+    </div>
+    <p class="note"><strong>Note on the Yotpo dashboard:</strong> Yotpo may show the on-site widget as "inactive" — this is a false positive caused by Instant Pages, the page builder used for product pages. The widget is verifiably live and reviews are displaying. No action needed.</p>
+  </section>
+
+  <!-- PAID MEDIA -->
+  <section>
+    <div class="section-head">
+      <h2>Paid Media · Meta — main working, retargeting fragmented</h2>
+      <span class="section-num">03</span>
+    </div>
+    <div class="two-col">
+
+      <div class="panel">
+        <h3>Main sales campaign</h3>
+        <div class="row"><span class="k">Purchases</span><span class="v accent">101</span></div>
+        <div class="row"><span class="k">CPA</span><span class="v">~A$47 <span class="pill good">healthy</span></span></div>
+        <div class="row"><span class="k">Impressions</span><span class="v">~237K</span></div>
+        <div class="row"><span class="k">Top creatives</span><span class="v">A$11–A$20 CPA</span></div>
+        <div class="row"><span class="k">Tracking · pixel · Shopify</span><span class="v">all healthy</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>Retargeting · launched 31 Mar</h3>
+        <div class="row"><span class="k">Spend</span><span class="v">~A$243</span></div>
+        <div class="row"><span class="k">Purchases</span><span class="v" style="color: var(--warn);">0 <span class="pill warn">structural fix</span></span></div>
+        <div class="row"><span class="k">Ad sets</span><span class="v">4 (Tier 1–4 split)</span></div>
+        <div class="row"><span class="k">Audiences</span><span class="v"><small>Broad warm · Warm · Hottest · Past purchasers</small></span></div>
+        <div class="row"><span class="k">Diagnosis</span><span class="v"><small>Budget fragmentation across 4 ad sets</small></span></div>
+      </div>
+
+    </div>
+
+    <div class="panel" style="margin-top: 16px;">
+      <h3>Recommended fix · awaiting sign-off</h3>
+      <div class="row"><span class="k"><strong>1.</strong> &nbsp;Pause current retargeting campaign immediately</span><span class="v"><small>Stops the bleed</small></span></div>
+      <div class="row"><span class="k"><strong>2.</strong> &nbsp;Rebuild as 1 campaign · 1 ad set · combined audience</span><span class="v"><small>Website 30d + ATC 30d + engagers 30d</small></span></div>
+      <div class="row"><span class="k"><strong>3.</strong> &nbsp;Budget A$50–A$80/day · single pool</span><span class="v"><small>No tier splits</small></span></div>
+      <div class="row"><span class="k"><strong>4.</strong> &nbsp;Creative · duplicate top performers from main</span><span class="v"><small>Testimonials · social proof · urgency</small></span></div>
+      <div class="row"><span class="k"><strong>Main sales campaign</strong></span><span class="v accent">Do not touch</span></div>
+    </div>
+  </section>
+
+  <!-- COHORT RETENTION -->
+  <section>
+    <div class="section-head">
+      <h2>Customers are coming back</h2>
+      <span class="section-num">04</span>
+    </div>
+    <div class="cohort">
+      <div class="cohort-row">
+        <div class="name">Nov '25</div>
+        <div class="bar-track"><div class="bar-fill" style="width: 0%;"></div></div>
+        <div class="pct">0.00%</div>
+      </div>
+      <div class="cohort-row">
+        <div class="name">Dec '25</div>
+        <div class="bar-track"><div class="bar-fill" style="width: 6%;"></div></div>
+        <div class="pct">1.76%</div>
+      </div>
+      <div class="cohort-row">
+        <div class="name">Jan '26</div>
+        <div class="bar-track"><div class="bar-fill" style="width: 4%;"></div></div>
+        <div class="pct">0.95%</div>
+      </div>
+      <div class="cohort-row highlight">
+        <div class="name">Feb '26</div>
+        <div class="bar-track"><div class="bar-fill" style="width: 100%;"></div></div>
+        <div class="pct">26.71%</div>
+      </div>
+    </div>
+    <p class="note">Feb 2026 is the first full month of new-site traffic. The Month-1 return rate jumped roughly 15× from pre-launch cohorts. Direction is clear and aligns with the launch.</p>
+  </section>
+
+  <!-- VOICE OF CUSTOMER -->
+  <section>
+    <div class="section-head">
+      <h2>Voice of customer</h2>
+      <span class="section-num">05</span>
+    </div>
+    <div class="quote">
+      For the first time in my life I'm locked in not getting distracted and stress isn't a factor — 10/10 recommend.
+      <span class="attr">— Nikita M. · 5 stars · 24 March</span>
+    </div>
+    <div class="quote">
+      I absolutely love this product. I can't start my day without it. How did I live 38 years without it?
+      <span class="attr">— Andrew D. · 5 stars · 2 March</span>
+    </div>
+    <div class="quote">
+      These definitely help with the morning low gear start. Just like being at ya peak all day.
+      <span class="attr">— Patrick D. · 5 stars · 26 April</span>
+    </div>
+  </section>
+
+  <!-- STRATEGIC PIVOT -->
+  <section class="pagebreak">
+    <div class="section-head">
+      <h2>The plan for May</h2>
+      <span class="section-num">06</span>
+    </div>
+
+    <div class="argument">
+      <div class="arg-eyebrow">Strategic premise</div>
+      <h3>Make every ad dollar work harder by feeding the team better creative — and grow the channels we don't have to pay for.</h3>
+      <p>Right now, customer acquisition leans heavily on paid media. That works (main campaign at A$47 CPA), but it puts the brand in a position where every customer costs spend and growth depends on creative supply.</p>
+      <p>The next phase invests in <strong>UGC for creative supply</strong>, <strong>content for organic reach</strong>, and <strong>finished email flows for retention</strong>. By Q3, paid should be one channel among several — not the only one.</p>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <span class="tier-num">Tier 1 — Headline work</span>
+        <span class="tier-name">UGC + content engine</span>
+      </div>
+      <ul>
+        <li><span class="task">Audit + refine Instagram + Facebook profiles before outreach</span><span class="timing">Week 1</span></li>
+        <li><span class="task">Top 20 priority influencer outreach — DM + email</span><span class="timing">Week 1–2</span></li>
+        <li><span class="task">UGC seeding — gift product to 15–25 creators</span><span class="timing warn">awaiting approval</span></li>
+        <li><span class="task">Build creative library from incoming UGC for ad team</span><span class="timing">Week 3–4</span></li>
+        <li><span class="task">Direct content creation for Megamind</span><span class="timing">ongoing</span></li>
+      </ul>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <span class="tier-num">Tier 2</span>
+        <span class="tier-name">Email + owned audience</span>
+      </div>
+      <ul>
+        <li><span class="task">Build remaining email flows (post-purchase, browse abandonment, sub nudge, win-back)</span><span class="timing">Week 1–2</span></li>
+        <li><span class="task">Email campaigns featuring 5 new SEO blogs</span><span class="timing">staggered Week 1–4</span></li>
+        <li><span class="task">SMS campaign rhythm</span><span class="timing">Week 2</span></li>
+        <li><span class="task">Klaviyo ↔ Meta audience sync (better lookalikes for ad team)</span><span class="timing">Week 1</span></li>
+      </ul>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <span class="tier-num">Tier 3</span>
+        <span class="tier-name">Paid media support</span>
+      </div>
+      <ul>
+        <li><span class="task">Retargeting rebuild execution (per fix above)</span><span class="timing warn">awaiting sign-off</span></li>
+        <li><span class="task">Creative library feed → ad team</span><span class="timing">ongoing from Week 3</span></li>
+        <li><span class="task">UGC whitelisting setup</span><span class="timing">Week 4</span></li>
+        <li><span class="task">Reels added to product page video carousel</span><span class="timing">Week 1</span></li>
+      </ul>
+    </div>
+
+    <div class="tier">
+      <div class="tier-head">
+        <span class="tier-num">Tier 4</span>
+        <span class="tier-name">Channel expansion</span>
+      </div>
+      <ul>
+        <li><span class="task">TikTok Shop setup</span><span class="timing warn">awaiting login</span></li>
+        <li><span class="task">Boost AI · Shopify search</span><span class="timing">Week 1–2</span></li>
+        <li><span class="task">Segmented landing pages (founder · ADHD · gym)</span><span class="timing">Week 2–3</span></li>
+        <li><span class="task">Content shoot</span><span class="timing warn">awaiting dates</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ITEMS WAITING -->
+  <section>
+    <div class="section-head">
+      <h2>Items waiting on you</h2>
+      <span class="section-num">07</span>
+    </div>
+    <div class="waiting">
+      <div class="waiting-row">
+        <div class="waiting-num">01</div>
+        <div class="waiting-text"><strong>TikTok Shop login credentials</strong> — needed to begin TikTok Shop setup.</div>
+        <div class="waiting-status">Outstanding</div>
+      </div>
+      <div class="waiting-row">
+        <div class="waiting-num">02</div>
+        <div class="waiting-text"><strong>Two date options for content shoot</strong> — needed to lock production schedule for May/June.</div>
+        <div class="waiting-status">Outstanding</div>
+      </div>
+      <div class="waiting-row">
+        <div class="waiting-num">03</div>
+        <div class="waiting-text"><strong>Sign-off on retargeting rebuild</strong> — diagnosis sent 27 days ago. Every day current campaign runs is wasted spend.</div>
+        <div class="waiting-status">Blocking</div>
+      </div>
+      <div class="waiting-row">
+        <div class="waiting-num">04</div>
+        <div class="waiting-text"><strong>Approval for UGC seeding</strong> — gifting 15–25 product units to creators. Need green light Week 1.</div>
+        <div class="waiting-status neutral">This week</div>
+      </div>
+      <div class="waiting-row">
+        <div class="waiting-num">05</div>
+        <div class="waiting-text"><strong>Email frequency increase</strong> — confirm lift to ~2 sends/week. Data supports it.</div>
+        <div class="waiting-status neutral">This week</div>
+      </div>
+      <div class="waiting-row">
+        <div class="waiting-num">06</div>
+        <div class="waiting-text"><strong>Customer service workflow</strong> — three options on the table: you action daily / in-house assignee / Kristie adds to retainer with SLA.</div>
+        <div class="waiting-status neutral">Decision</div>
+      </div>
+    </div>
+    <p class="note">A 15-minute call this week unblocks most of the above in one pass.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="doc-foot">
+    <div>Kristie Dee &nbsp;·&nbsp; In Haus Studio &nbsp;·&nbsp; Megamind retainer</div>
+    <div>v.04.27</div>
+  </div>
+
+</div>
+</body>
+</html>
